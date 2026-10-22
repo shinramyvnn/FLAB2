@@ -1,5 +1,7 @@
+; =====================================================================
 ; Machine Problem 2 — Dungeon Adventure and Survival Game
 ; NASM 32-bit Assembly for Linux (int 0x80)
+; =====================================================================
 
 section .data
    ; Welcome ASCII Art & Messages
@@ -74,6 +76,9 @@ section .data
                 "[1] Open Chest  [2] Leave Chest", 0x0A, \
                 "Enter choice: ", 0
    treasure_art_len equ $ - treasure_art
+
+   msg_gain_gold db 0x0A, "Gained 50 gold!", 0x0A, 0
+   msg_gain_gold_len equ $ - msg_gain_gold
 
    ; Room 3: Dragon's Lair
    dragon_art db 0x0A, "            / \  //\", 0x0A, \
@@ -439,6 +444,13 @@ room_2_treasure:
 gain_gold:
    add dword [player_gold], 50
 
+   ; Display Gold Gained
+   mov eax, 4
+   mov ebx, 1
+   mov ecx, msg_gain_gold
+   mov edx, msg_gain_gold_len
+   int 0x80
+
 skip_gold:
    mov dword [current_room], 2
    ret
@@ -609,11 +621,9 @@ use_potion:
    cmp eax, 0
    jle no_potions
 
-   ; Consume potion
    dec dword [player_pots]
    add dword [player_hp], 20
 
-   ; Cap health at max_hp
    mov eax, [player_max_hp]
    cmp [player_hp], eax
    jle potion_done
